@@ -1,0 +1,6 @@
+Set Ode$Dir <Obey$Dir>
+Set OdeWrd$Dir <Ode$Dir>.Words
+IconSprites <Ode$Dir>.!Sprites
+IconSprites <Ode$Dir>.Sprites
+WimpSlot -min 70k -max 70k
+Run <Ode$Dir>.!RunImage

@@ -1,0 +1,63 @@
+                     
+                   ############  
+                   # Ode 4.51 #
+                   ############  
+                by Barney Livingston
+
+ INSTRUCTIONS: Load it and click on the "Next Ode" button a bit.
+   To add your own words, open the file for the type of word you want to add
+    then type your word at the end and save it. For nouns the word needs to
+    be entered then a number separated by a comma. The meaning of the numbers
+    is: 0=the 1=a 2=an 3=some 4=(nothing) 5=my These words will precede the
+    word in the sentence.
+ Note, in some places magenta and yellow have been replaced by red and blue, 
+  as magenta cannot be produced on a 16 colour desktop and yellow was
+  unreadable.
+  
+History:
+Version 2.0 (23,2,94)
+ Second line added. 
+Version 2.1 (18,7,94)
+Transferred from the Beeb in December 1994
+Version 3.1 (with word wrapping) completed 9,8,94 (version transferred)
+Version 3.49 (Much neater but still with noun bug) completed 9,5,95 for
+ Mark Hiscott (Who complained about it always saying "Ode to the romans who
+ I cut out of a magazine one midsummer morning" (Which has been fixed))
+ PseudoMultiTasking Ode (runs in a Task Window)
+Version 3.61
+ The very first fully multi-tasking version!!
+ Completed 15,6,95 version 3.61 now takes its words from the text files:
+  nouns, verbs, adjs and ings inside the application directory.
+ Still with the noun bug (a result of writing it on a Beeb, another result is
+  that all the text is in upper case)
+Version 3.62
+ Now with menus!! (and the noun bug)
+Version 4.10 (I think, but I have probably missed some)
+ Noun bug removed! and so has the big sprite at the top because it took too
+ long to load and too much memory etc. Puts an icon on the icon bar and
+ renamed from !MultiOde back to the original !Ode. Can now save odes as text 
+ files using dragging and dropping.
+Version 4.12
+ All new icons (designed in draw then snapshoted). Icons are reiconsprited on
+ mode change (including 32000+ colour modes). Text now in lower case.
+Version 4.51 (12 Jan 1996)
+ Word database added for easy adding/deleteing of words (this is essentialy a
+ different program, it has it's own poll loop).
+Version 4.52 (02 Apr 1996)
+ A lot more CPU efficient, changed from using about 40% of processor time to
+ less than 0.0%.
+Version 4.60 (14 Apr 1996)
+ Removed reiconspriteing and 32000 colour icon as they were a pointless waste
+ of time and memory, plus other stuff.
+Version 4.61 (23 Jul 1996)
+ Fixed two bugs.
+Version 4.65 (23 Jul 1996)
+ Vastly improved handling of plurals following rules in Collins English
+ Dictionary.
+Version 5.00 (14 Feb 1997)
+ All words put into catagories which can be turned on or off as needed, also
+ the noun in the first line can be specified using a writable menu option.
+Version 5.01 (21 Feb 1997)
+ Saves Odes directly into other programs (via Scrap).
+ ©BarnSoft 1996
+ 

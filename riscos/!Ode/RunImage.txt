@@ -1,0 +1,554 @@
+REM ODE 5.01 21/02/1997 by Barney Livingston
+ONERROR OSCLI"Error "+REPORT$+" at line "+STR$(ERL):END
+dummy=RND(-TIME)
+DIM block% &1000
+DIM q% &100
+DIM menu% &500
+DIM wmen% &500
+DIM nmen% &500
+DIM vmen% &500
+DIM imen% &500
+DIM amen% &500
+DIM entnoun% &100
+DIM word$(1000)
+DIM adjs$(20)
+DIM nouns$(20)
+DIM ifont% 256
+DIM wordir$(3)
+wordir$()="<OdeWrd$Dir>.Nouns.","<OdeWrd$Dir>.Verbs.","<OdeWrd$Dir>.Ings.","<OdeWrd$Dir>.Adjs."
+DIM nounfl$(6)
+DIM verbfl$(3)
+DIM ingfl$(3)
+DIM adjfl$(5)
+nounfl$()="Specific","Animals","Computer","Food+Veg","People+Pla","Other","User"
+verbfl$()="Neutral","Nasty","Nice","User"
+ingfl$()="Neutral","Nasty","Nice","User"
+adjfl$()="Colours","Emotions","Number","Size+Shape","Other","User"
+DIM enounbuf% 100
+usenoun%=%0111110
+useverb%=%0111
+useing%=%0111
+useadj%=%011111
+update%=1
+
+main_memory%=2048:DIM mainw% main_memory%
+info_memory%=512:DIM infow% info_memory%
+save_memory%=512:DIM savew% save_memory%
+edit_memory%=1024:DIM editw% edit_memory%
+mainend%=mainw%+main_memory%
+infoend%=infow%+info_memory%
+saveend%=savew%+save_memory%
+editend%=editw%+edit_memory%
+versionum$="5.01"
+version$=versionum$+" (21 Feb 1997)"
+LIBRARY "<Ode$Dir>.Lib"
+$block%="TASK"
+SYS "Wimp_Initialise",200,!block%,"Ode" TO ,task%
+
+SYS "Wimp_OpenTemplate",,"<Ode$Dir>.Templates"
+SYS "Wimp_LoadTemplate",,block%,mainw%,mainend%,-1,"OdeWin",0
+SYS "Wimp_CreateWindow",,block% TO window%
+SYS "Wimp_LoadTemplate",,block%,infow%,infoend%,ifont%,"Info",0
+SYS "Wimp_CreateWindow",,block% TO info%
+SYS "Wimp_LoadTemplate",,block%,savew%,saveend%,-1,"Save",0
+SYS "Wimp_CreateWindow",,block% TO save%
+SYS "Wimp_LoadTemplate",,block%,editw%,editend%,-1,"Edit",0
+SYS "Wimp_CreateWindow",,block% TO edit%
+SYS "Wimp_CloseTemplate"
+PROCwritetotexticon(window%,6,"Version: "+versionum$)
+icon%=FNiconbar("!ode")
+
+PROCinit_menu(menu%,width%,end%,"Ode")
+PROCst_menu_item(menu%,width%,end%,"Info",0,0,0,0,info%)
+PROCst_menu_item(menu%,width%,end%,"Next ode",0,0,0,0,0)
+PROCst_menu_item(menu%,width%,end%,"Save ode",0,0,0,0,save%)
+PROCst_menu_item(menu%,width%,end%,"Include",0,0,0,0,wmen%)
+PROCst_menu_item(menu%,width%,end%,"Edit",0,0,0,0,wmen%)
+PROCst_menu_item(menu%,width%,end%,"Help",0,0,0,0,0)
+PROCst_menu_item(menu%,width%,end%,"Quit",0,0,0,1,0)
+
+PROCinit_menu(wmen%,width%,end%,"Words")
+PROCst_menu_item(wmen%,width%,end%,"Nouns",0,0,0,0,nmen%)
+PROCst_menu_item(wmen%,width%,end%,"Verbs",0,0,0,0,vmen%)
+PROCst_menu_item(wmen%,width%,end%,"Ings",0,0,0,0,imen%)
+PROCst_menu_item(wmen%,width%,end%,"Adjs",0,0,0,1,amen%)
+
+PROCinit_menu(nmen%,width%,end%,"Nouns")
+PROCst_menu_item(nmen%,width%,end%,"Specific",0,1,0,0,entnoun%)
+PROCst_menu_item(nmen%,width%,end%,"Animals",1,0,0,0,0)
+PROCst_menu_item(nmen%,width%,end%,"Computer",1,0,0,0,0)
+PROCst_menu_item(nmen%,width%,end%,"Food+Veg",1,0,0,0,0)
+PROCst_menu_item(nmen%,width%,end%,"People+Places",1,0,0,0,0)
+PROCst_menu_item(nmen%,width%,end%,"Other",1,0,0,0,0)
+PROCst_menu_item(nmen%,width%,end%,"User",0,0,0,1,0)
+
+PROCinit_menu(vmen%,width%,end%,"Verbs")
+PROCst_menu_item(vmen%,width%,end%,"Neutral",1,0,0,0,0)
+PROCst_menu_item(vmen%,width%,end%,"Nasty",1,0,0,0,0)
+PROCst_menu_item(vmen%,width%,end%,"Nice",1,0,0,0,0)
+PROCst_menu_item(vmen%,width%,end%,"User",0,0,0,1,0)
+
+PROCinit_menu(imen%,width%,end%,"Ings")
+PROCst_menu_item(imen%,width%,end%,"Neutral",1,0,0,0,0)
+PROCst_menu_item(imen%,width%,end%,"Nasty",1,0,0,0,0)
+PROCst_menu_item(imen%,width%,end%,"Nice",1,0,0,0,0)
+PROCst_menu_item(imen%,width%,end%,"User",0,0,0,1,0)
+
+PROCinit_menu(amen%,width%,end%,"Adjs")
+PROCst_menu_item(amen%,width%,end%,"Colours",1,0,0,0,0)
+PROCst_menu_item(amen%,width%,end%,"Emotions",1,0,0,0,0)
+PROCst_menu_item(amen%,width%,end%,"Number",1,0,0,0,0)
+PROCst_menu_item(amen%,width%,end%,"Size+Shape",1,0,0,0,0)
+PROCst_menu_item(amen%,width%,end%,"Other",1,0,0,0,0)
+PROCst_menu_item(amen%,width%,end%,"User",0,0,0,1,0)
+
+PROCinit_menu(entnoun%,width%,end%,"Enter Noun")
+dfile%=OPENIN(wordir$(0)+nounfl$(0))
+PROCst_menu_item(entnoun%,width%,end%,GET$#dfile%,0,0,0,1,0)
+CLOSE#dfile%
+$enounbuf%=""
+PROCmenuwrite(entnoun%,1,enounbuf%,0,100)
+
+PROCcheckusers
+PROCWimp_WindowOpen(window%)
+PROCwritetotexticon(info%,7,version$)
+PROCnewode
+
+ONERROR PROCohdamn
+REPEAT
+SYS "Wimp_Poll",1,q% TO A%
+CASE A% OF
+WHEN 2:SYS"Wimp_OpenWindow",,q%
+WHEN 3:SYS"Wimp_CloseWindow",,q%
+WHEN 6:PROCclick
+WHEN 7
+ PROCDragBoxEnd(FNreadicon(save%,2))
+ SYS"Wimp_CreateMenu",-1
+WHEN 9:PROCmenuselect
+WHEN 17,18:PROCmess
+ENDCASE
+UNTIL FALSE
+
+DEFPROCclick
+ico%=q%!16:win%=q%!12:but%=q%!8
+IF ico%=icon% AND win%=-2 AND but%=2 PROCdisplay_bar_menu(menu%,7,0,!q%)
+IF ico%=icon% AND win%=-2 AND but%<>2 PROCWimp_WindowOpen(window%)
+CASE win% OF
+WHEN window%
+ CASE ico% OF
+ WHEN 7:PROCnewode
+ WHEN 8:OSCLI"Filer_Run <Ode$Dir>.!Help"
+ WHEN 9:SYS"Wimp_CloseDown":END
+ ENDCASE
+ IF but%=2 PROCdisplay_menu(menu%,!q%,q%!4)
+WHEN save%
+ CASE ico% OF
+ WHEN 1:PROCDragSave
+ WHEN 3
+   IF INSTR(FNreadicon(save%,2),".")=0 PROCAlertBox("Ode","To save, drag the icon to a directory display.")
+   IF FNreadicon(save%,2)<>"" AND INSTR(FNreadicon(save%,2),".")<>0 THEN
+    savefile$=FNreadicon(save%,2)
+    savef%=OPENOUT(savefile$)
+    BPUT#savef%,"An ode produced by Ode version "+versionum$+" by Barney Livingston."
+    BPUT#savef%,""
+    BPUT#savef%,LA$
+    BPUT#savef%,LB$
+    CLOSE#savef%
+    OSCLI"SetType "+savefile$+" text"
+   ENDIF
+ ENDCASE  
+ENDCASE
+ENDPROC
+
+DEFPROCmenuselect
+CASE !q% OF
+WHEN 6:SYS"Wimp_CloseDown":END
+WHEN 5:OSCLI"Filer_Run <Ode$Dir>.!Help"
+WHEN 4
+ CASE q%!4 OF
+ WHEN 0:PROCedit(wordir$(q%!4)+nounfl$(q%!8))
+ WHEN 1:PROCedit(wordir$(q%!4)+verbfl$(q%!8))
+ WHEN 2:PROCedit(wordir$(q%!4)+ingfl$(q%!8))
+ WHEN 3:PROCedit(wordir$(q%!4)+adjfl$(q%!8))
+ ENDCASE
+WHEN 3
+ CASE q%!4 OF
+ WHEN 0:IF (usenoun% AND 1<<q%!8)=0 PROCTickMenu(nmen%,q%!8,TRUE) ELSE PROCTickMenu(nmen%,q%!8,FALSE)
+  usenoun%=usenoun% EOR 1<<q%!8
+ WHEN 1:IF (useverb% AND 1<<q%!8)=0 PROCTickMenu(vmen%,q%!8,TRUE) ELSE PROCTickMenu(vmen%,q%!8,FALSE)
+  useverb%=useverb% EOR 1<<q%!8
+ WHEN 2:IF (useing% AND 1<<q%!8)=0 PROCTickMenu(imen%,q%!8,TRUE) ELSE PROCTickMenu(imen%,q%!8,FALSE)
+  useing%=useing% EOR 1<<q%!8
+ WHEN 3:IF (useadj% AND 1<<q%!8)=0 PROCTickMenu(amen%,q%!8,TRUE) ELSE PROCTickMenu(amen%,q%!8,FALSE)
+  useadj%=useadj% EOR 1<<q%!8
+ ENDCASE
+ update%=1
+WHEN 1:PROCnewode
+ENDCASE
+SYS "Wimp_GetPointerInfo",,block%
+IF block%!8=1 THEN PROCdisplay_menu(menu%,!q%,q%!4)
+ENDPROC
+
+DEFPROCmess
+CASE q%!16 OF
+WHEN 0:SYS"Wimp_CloseDown":END
+WHEN 2
+ savefile$=""
+ savefile$=FNstring(q%+44)
+ IF savefile$<>"" THEN
+  savef%=OPENOUT(savefile$)
+  BPUT#savef%,"An ode produced by Ode version "+versionum$+" by Barney Livingston."
+  BPUT#savef%,""
+  BPUT#savef%,LA$
+  BPUT#savef%,LB$
+  CLOSE#savef%
+  OSCLI"SetType "+savefile$+" text"
+  q%!12=q%!8:q%!16=3
+  SYS"Wimp_SendMessage",17,q%,q%!4
+ ENDIF
+ENDCASE
+ENDPROC
+
+DEFPROCnewode
+IF update%=1 THEN
+PROCcreatefiles
+NOUN=FNcount("<Ode$Dir>.Nouns")
+VERB=FNcount("<Ode$Dir>.Verbs")
+ING=FNcount("<Ode$Dir>.Ings")
+ADJ=FNcount("<Ode$Dir>.Adjs")
+PROCwritetotexticon(window%,3,STR$(NOUN+VERB+ING+ADJ)+" Words")
+PROCwritetotexticon(window%,4,STR$(NOUN*NOUN*VERB*ING*ADJ)+" Combinations")
+update%=0
+ENDIF
+PROCopenfiles
+REPEAT
+PROCinit
+IF (usenoun% AND 1)=0 PROCnoun ELSE N$=$enounbuf%:PN$="":WH$=""
+PROCverbs
+PROCassmla
+A=RND(NOUN):PTR#nounhdl%=0:B=0:N$="":PN=0:PN$="":P=0:P$=""
+PROCnoun
+PROCings
+PROCadj
+PROCassmlb
+UNTIL LEN(LA$)<80 AND LEN(LB$)<80
+PROCwritetotexticon(window%,1,LA$)
+PROCwritetotexticon(window%,2,LB$)
+PROCclosefiles
+ENDPROC
+
+DEFPROCinit
+A=0:B=0:C=0:D=0:E=0:F=0:G=0:H=0
+PTR#nounhdl%=0
+PTR#verbhdl%=0
+PTR#adjhdl%=0
+PTR#inghdl%=0
+A=RND(NOUN)
+C=RND(VERB)
+E=RND(ING)
+G=RND(ADJ)
+N$="":PN=0:PN$="":P=0
+ENDPROC
+
+DEFPROCnoun
+REPEAT
+B=B+1
+Ntemp$=GET$#nounhdl%
+UNTIL A=B
+com%=INSTR(Ntemp$,",")
+ppp$=RIGHT$(Ntemp$,3)
+PN=VAL(LEFT$(ppp$,1))
+w%=VAL(RIGHT$(ppp$,1))
+N$=LEFT$(Ntemp$,com%-1)
+CASE PN OF
+WHEN 0:PN$=" the"
+WHEN 1:PN$=" a"
+WHEN 2:PN$=" an"
+WHEN 3:PN$=" some"
+WHEN 4:PN$=""
+WHEN 5:PN$=" my"
+ENDCASE
+CASE w% OF
+WHEN 0:WH$=" which"
+WHEN 1:WH$=" who"
+ENDCASE
+ENDPROC
+
+DEFPROCverbs
+REPEAT
+D=D+1
+V$=GET$#verbhdl%
+UNTIL C=D OR EOF#verbhdl%
+ENDPROC
+
+DEFPROCings
+REPEAT
+F=F+1
+ING$=GET$#inghdl%
+UNTIL E=F
+ENDPROC
+
+DEFPROCadj
+REPEAT
+H=H+1
+Z$=GET$#adjhdl%
+UNTIL G=H
+CASE LEFT$(Z$,1) OF
+WHEN "A","a","E","e","I","i","O","o","U","u":P$="an"
+OTHERWISE:P$="a"
+IF PN=3 P$="some"
+ENDCASE
+S=0
+S=VAL(Z$)
+IF S=0 THEN PL$="" ELSE PL$="s"
+IF S<>0 THEN
+nounend$=RIGHT$(N$,2)
+IF nounend$="ch" OR nounend$="sh" OR nounend$="ss" OR RIGHT$(N$,1)="s" OR RIGHT$(N$,1)="x" OR RIGHT$(N$,1)="o" PL$="es"
+IF nounend$="ex" OR nounend$="ix" THEN
+N$=LEFT$(N$,(LEN(N$)-2))
+PL$="ices"
+ENDIF
+IF RIGHT$(N$,1)="y" THEN
+CASE LEFT$(nounend$,1) OF
+WHEN "a","e","i","o","u"
+OTHERWISE:N$=LEFT$(N$,(LEN(N$)-1))+"ie"
+ENDCASE
+ENDIF
+ENDIF
+IF S=0 THEN ADJ$=P$+" "+Z$ ELSE ADJ$=Z$
+ENDPROC
+
+DEFPROCassmla
+LA$="Ode to"+PN$+" "+N$+WH$+" I "+V$+" one midsummer morning,"
+ENDPROC
+
+DEFPROCassmlb
+LB$="while "+ING$+" "+ADJ$+" "+N$+PL$+"."
+ENDPROC
+
+DEFPROCopenfiles
+nounhdl%=OPENIN"<Ode$Dir>.nouns"
+verbhdl%=OPENIN"<Ode$Dir>.verbs"
+adjhdl%=OPENIN"<Ode$Dir>.adjs"
+inghdl%=OPENIN"<Ode$Dir>.ings"
+ENDPROC
+
+DEFPROCedit(edfile$)
+REMPROCclosefiles
+words%=FNloadwords(edfile$)
+currwd%=1
+PROCwritetotexticon(edit%,0,FNgetleaf(edfile$))
+PROCupdateics
+PROCWimp_WindowOpen(edit%)
+REPEAT
+SYS "Wimp_Poll",1,q% TO A%
+CASE A% OF
+WHEN 2:SYS"Wimp_OpenWindow",,q%
+WHEN 3:SYS"Wimp_CloseWindow",,q%
+WHEN 6:PROCclickE
+WHEN 17,18:IF q%!16=0 SYS"Wimp_CloseDown":END
+ENDCASE
+UNTIL NOT FNOpen(edit%)
+REMPROCopenfiles
+ENDPROC
+
+DEFPROCclickE
+IF q%!12=edit% THEN
+CASE q%!16 OF
+WHEN 5
+ wd$=FNreadicon(edit%,2)
+ IF wd$<>word$(currwd%) word$(currwd%)=wd$
+ IF currwd%<>1 currwd%-=1
+ PROCupdateics
+WHEN 6
+ wd$=FNreadicon(edit%,2)
+ IF wd$<>word$(currwd%) word$(currwd%)=wd$
+ IF currwd%<>words% currwd%+=1
+ PROCupdateics
+WHEN 7
+ file%=OPENOUT(edfile$)
+ FOR x%=1 TO words%
+  BPUT#file%,word$(x%)
+ NEXT x%
+ CLOSE#file%
+ !q%=edit%:SYS"Wimp_CloseWindow",,q%
+WHEN 13
+ words%+=1
+ currwd%=words%
+ PROCupdateics
+WHEN 14
+ FOR n%=currwd% TO words%
+  word$(n%)=word$(n%+1)
+ NEXT n%
+ words%-=1
+ IF currwd%>words% currwd%=words%
+ PROCupdateics
+WHEN 15
+ wd$=FNreadicon(edit%,2)
+ IF wd$<>word$(currwd%) word$(currwd%)=wd$
+ currwd%=words%
+ PROCupdateics
+WHEN 16
+ wd$=FNreadicon(edit%,2)
+ IF wd$<>word$(currwd%) word$(currwd%)=wd$
+ currwd%=1
+ PROCupdateics
+WHEN 8:!q%=edit%:SYS"Wimp_CloseWindow",,q%
+ENDCASE
+ELSE
+PROCAlertBox("Ode","Sorry, you cannot use this window while the Edit window is open. Close it and try again.")
+ENDIF
+ENDPROC
+
+DEFFNloadwords(file$)
+words%=FNcount(file$)
+filehdl%=OPENUP(file$)
+word$()=""
+PTR#filehdl%=0
+FOR c%=1 TO words%
+word$(c%)=GET$#filehdl%
+NEXT c%
+CLOSE#filehdl%
+=words%
+
+DEFPROCupdateics
+PROCwritetotexticon(edit%,2,word$(currwd%))
+PROCwritetotexticon(edit%,4,STR$(currwd%))
+PROCwritetotexticon(edit%,18,STR$(words%))
+ENDPROC
+
+DEFFNcount(file$)
+LOCAL c%,file%
+file%=OPENIN(file$)
+REPEAT
+dummy$=GET$#file%
+c%+=1
+UNTIL EOF#file%
+CLOSE#file%
+=c%
+
+DEFPROCgetfiles(dir$,file$(),menu%)
+LOCAL off%,f$
+off%=0
+REPEAT
+SYS "OS_GBPB",9,dir$,block%,1,off%,256,"*" TO ,,f$,,off%
+IF off%<>-1 THEN
+ file$(off%)=f$
+ PROCst_menu_item(menu%,width%,end%,f$,0,0,0,0,0)
+ENDIF
+UNTIL off%=-1
+ENDPROC
+
+DEFPROCclosefiles
+CLOSE#nounhdl%
+CLOSE#verbhdl%
+CLOSE#inghdl%
+CLOSE#adjhdl%
+ENDPROC
+
+DEFPROCcheckusers
+LOCAL k%,file%
+FORk%=0 TO 3
+file%=OPENIN(wordir$(k%)+"User")
+IF file%<>0 THEN
+IF EXT#file%=0 PROCusershade(k%):CLOSE#file% ELSE CLOSE#file%
+ELSE PROCusershade(k%):CLOSE#file%
+ENDIF
+NEXT k%
+ENDPROC
+
+DEFPROCusershade(k%)
+CASE k% OF
+ WHEN 0:PROCShadeMenu(nmen%,6,TRUE)
+ WHEN 1:PROCShadeMenu(vmen%,3,TRUE)
+ WHEN 2:PROCShadeMenu(imen%,3,TRUE)
+ WHEN 3:PROCShadeMenu(amen%,5,TRUE)
+ENDCASE
+ENDPROC
+
+DEFPROCcreatefiles
+file%=OPENOUT"<Ode$Dir>.Nouns"
+FORk%=1 TO 6
+IF (usenoun% AND 1<<k%)<>0 file1%=OPENIN(wordir$(0)+nounfl$(k%)):PROCfilecopy(file%,file1%):CLOSE#file1%
+NEXT k%
+CLOSE#file%
+file%=OPENOUT"<Ode$Dir>.Verbs"
+FORk%=0 TO 3
+IF (useverb% AND 1<<k%)<>0 file1%=OPENIN(wordir$(1)+verbfl$(k%)):PROCfilecopy(file%,file1%):CLOSE#file1%
+NEXT k%
+CLOSE#file%
+file%=OPENOUT"<Ode$Dir>.Ings"
+FORk%=0 TO 3
+IF (useing% AND 1<<k%)<>0 file1%=OPENIN(wordir$(2)+ingfl$(k%)):PROCfilecopy(file%,file1%):CLOSE#file1%
+NEXT k%
+CLOSE#file%
+file%=OPENOUT"<Ode$Dir>.Adjs"
+FORk%=0 TO 5
+IF (useadj% AND 1<<k%)<>0 file1%=OPENIN(wordir$(3)+adjfl$(k%)):PROCfilecopy(file%,file1%):CLOSE#file1%
+NEXT k%
+CLOSE#file%
+ENDPROC
+
+DEFPROCfilecopy(file%,file1%)
+REPEAT
+BPUT#file%,GET$#file1%
+UNTIL EOF#file1%
+ENDPROC
+
+DEFFNgetleaf(f$)
+REPEAT
+f$=RIGHT$(f$,LEN(f$)-INSTR(f$,"."))
+UNTIL INSTR(f$,".")=0
+=f$
+
+DEFPROCDragSave
+!block%=save%
+SYS "Wimp_GetWindowState",,block%
+OffsetX%=block%!4-block%!20
+OffsetY%=block%!16-block%!24
+block%!0=save%
+block%!4=0
+SYS "Wimp_GetIconState",,block%
+!block%=save%
+block%!4=5
+block%!8=block%!8+OffsetX%
+block%!12=block%!12+OffsetY%
+block%!16=block%!16+OffsetX%
+block%!20=block%!20+OffsetY%
+block%!24=0
+block%!28=0
+block%!32=&7FFFFFFF
+block%!36=&7FFFFFFF
+SYS "DragASprite_Start",%10000101,1,"file_fff",block%+8
+ENDPROC
+
+DEFPROCDragBoxEnd(LeafName$)
+Pointer%=LENLeafName$
+WHILE Pointer%>0 AND MID$(LeafName$,Pointer%,1)<>"."
+Pointer%-=1
+ENDWHILE
+LeafName$=MID$(LeafName$,Pointer%+1)
+SYS "DragASprite_Stop"
+SYS "Wimp_GetPointerInfo",,block%
+SenderWindow%=block%!12
+SenderIcon%=block%!16
+block%!20=SenderWindow%
+block%!24=SenderIcon%
+block%!28=block%!0
+block%!32=block%!4
+block%!0=44+LENLeafName$
+block%!0+=4-(block%!0 MOD 4)
+block%!4=0
+block%!8=0
+block%!12=0
+block%!16=1
+block%!36=0
+block%!40=&fff
+$(block%+44)=LeafName$+CHR$0
+SYS "Wimp_SendMessage",17,block%,SenderWindow%,SenderIcon%
+ENDPROC
+
+DEFPROCohdamn
+SYS "Wimp_ReportError","    "+REPORT$+" Click OK to continue or CANCEL to quit. (Code: "+STR$(ERL)+" "+STR$(ERR)+")",19,"Ode" TO ,b
+IF b=2 THEN SYS"Wimp_CloseDown":END
+ENDPROC
