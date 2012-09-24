@@ -60,7 +60,6 @@ body {
 	background-color: #D0BB5B;
 	border: solid #D0BB5B 5px;
 	width: 40em;
-	height: 30em;
 	margin: auto;
 }
 #middle {
