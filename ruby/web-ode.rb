@@ -171,7 +171,7 @@ function showAbout() {
 </div>
 </div>
 <div id="about">
-<p><span style="color: green;">O</span><span style="color: yellow;">D</span><span style="color: cyan;">E</span> was originally written on my BBC B in 1993 when I was 13. The form of the first line is of course based on the title of a poem by Poet Master Grunthos the Flatulent of the Azgoths of Kria, the second worst poets in the Universe.</p>
+<p><span style="color: green;">O</span><span style="color: yellow;">D</span><span style="color: cyan;">E</span> was originally written on my BBC B in 1993 when I was 13. The form of the first line is of course based on the title of a poem by <a href="http://en.wikipedia.org/wiki/Vogon#Poetry">Poet Master Grunthos the Flatulent of the Azgoths of Kria</a>, the second worst poets in the Universe.</p>
 <div class="pic">
 <img src="/ode/ode1.png"/>
 <p>Ode 1 title screen, 1993ish.</p>
@@ -185,6 +185,7 @@ function showAbout() {
 <p>In my post-Acorn years I've reimplemented Ode several times as an exercise when learning a new language. At some point in 97 or 98 I think I did a Pascal version, but I don't have it anymore. The next one was in 2001 in C, bad segfaulty C. A year later I did a version in Java, it was gratuitously object oriented.</p>
 <p>This version consists of quite a small amount of Ruby and is the most grammatically correct yet (it no longer comes up with stuff like "While stealing 15 milks"). The pluralising stuff is much easier with regex.</p>
 <p>All the code is <a href="https://github.com/barnoid/ode/">available on Github</a> including <a href="https://github.com/barnoid/ode/blob/79af1cd2f24ccc330ee8ccfb22eeb793990de8c8/bbc/ode.txt">the original</a>.</p>
+<p>Acknowledgements are due to: Douglas Adams, Peter Jones (not the original voice of the book, a school friend of mine), Mark Hiscott and Duncan Jauncey.</p>
 <p>The <a href="http://bjh21.me.uk/bedstead/">font on this page</a> was generated from the characters produced by the chip that handled Mode 7 on the BBC.</p>
 <p>
 </div>
